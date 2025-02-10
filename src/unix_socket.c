@@ -1,0 +1,87 @@
+#include <-Y11/utils.h>
+#include <-Y11/S/server.h>
+#include <-Y11/S/user.h>
+#include <-Y11/protocol.h>
+
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
+
+#include <stdint.h>
+#include <stdio.h>
+#include <errno.h>
+
+static eventfd_handler_f listen_socket_unix_ondata;
+static struct dynfd_type listen_socket_unix_type;
+
+void init_unix_socket(void){
+  static struct dynfd dfd;
+  dfd.type = &listen_socket_unix_type;
+  dfd.fd = socket(PF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0);
+  if(dfd.fd < 0){
+    perror("socket unix");
+    exit(1);
+  }
+  unlink(Y11_SOCKET_PATH);
+  if(bind(dfd.fd, UNIX_SOCKET(Y11_SOCKET_PATH)) == -1){
+    perror("bind unix");
+    exit(1);
+  }
+  if(listen(dfd.fd, 20) == -1){
+    perror("listen unix");
+    exit(1);
+  }
+  if(add_fd(&dfd)){
+    perror("epoll_ctl unix");
+    exit(1);
+  }
+}
+
+void listen_socket_unix_ondata(uint32_t events, struct dynfd* dfd){
+retry:;
+  (void)events;
+  const int session_socket = accept4(dfd->fd, NULL, NULL, SOCK_CLOEXEC);
+  if(session_socket == -1){
+    if(errno == EINTR)
+      goto retry;
+    if(errno == ECONNABORTED)
+      return;
+    perror("accept4 unix");
+    exit(1);
+  }
+  struct ucred cred = {0};
+  if(getsockopt(session_socket, SOL_SOCKET, SO_PEERCRED, &cred, &(socklen_t){sizeof(cred)}) == -1){
+    perror("getsockopt SOL_SOCKET SO_PEERCRED");
+    goto error;
+  }
+  struct user_data* user = user_get(cred.uid);
+  if(!user){
+    fprintf(stderr, "Failed to allocate user %lu\n", (long)cred.uid);
+    goto error;
+  }
+  struct session_data* sd = tcopy((struct session_data){
+    .super.type = &session_data_type,
+    .super.fd = session_socket,
+    .user = user,
+  });
+  if(!sd){
+    perror("calloc");
+    goto error_user;
+  }
+  printf("new connection fd:%d from unix socket \"%s\", uid %lu\n", session_socket, Y11_SOCKET_PATH, sd->user->uid);
+  if(add_fd(&sd->super)){
+    fprintf(stderr, "failed to add new unix socket client\n");
+    goto error_session;
+  }
+  return;
+error_session:
+  free(sd);
+error_user:
+  user_put(user);
+error:
+  close(session_socket);
+}
+
+static struct dynfd_type listen_socket_unix_type = {
+  .ondata = listen_socket_unix_ondata
+};
