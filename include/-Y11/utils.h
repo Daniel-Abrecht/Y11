@@ -17,6 +17,7 @@ static inline void* copy(const void* p, size_t s){
 #define u_typeof __typeof__
 #endif
 
+// TODO: Move this to dpa-utils
 #define tcopy(...) ((u_typeof(__VA_ARGS__)*) copy(&(__VA_ARGS__), sizeof(__VA_ARGS__)))
 
 #endif

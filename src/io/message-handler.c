@@ -1,4 +1,5 @@
 #include <-Y11/S/message-handler.h>
+#include <-Y11/S/client.h>
 #include <-Y11/S/server.h>
 #include <stdio.h>
 #include <string.h>

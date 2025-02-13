@@ -1,4 +1,5 @@
 #include <-Y11/utils.h>
+#include <-Y11/S/client-local-session.h>
 #include <-Y11/S/server.h>
 #include <-Y11/S/user.h>
 #include <-Y11/protocol.h>
@@ -10,6 +11,15 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <errno.h>
+#include <assert.h>
+
+#define UNIX_SOCKET(...) ((const struct sockaddr*)&(const struct { \
+    static_assert(sizeof((struct sockaddr_un){0}.sun_path) >= sizeof(__VA_ARGS__), "UNIX_SOCKET: path is too long: \"" __VA_ARGS__ "\""); \
+    struct sockaddr_un un; \
+  }){.un={ \
+    .sun_family = AF_UNIX, \
+    .sun_path = __VA_ARGS__ \
+  }}.un), sizeof(struct sockaddr_un)
 
 static eventfd_handler_f listen_socket_unix_ondata;
 static struct dynfd_type listen_socket_unix_type;

@@ -6,6 +6,7 @@
 #define Y11_VERSION_MINOR 1
 #define Y11_VERSION ((Y11_VERSION_MAJOR<<8) | Y11_VERSION_MINOR)
 
+// TODO: Should this be removed? It'd probably be better to use the home directory of a system user for running the service
 #ifndef Y11_DATADIR
 #define Y11_DATADIR "/var/lib/Y11/"
 #endif

@@ -1,5 +1,6 @@
 #include <-Y11/utils.h>
 #include <-Y11/S/server.h>
+#include <-Y11/S/client-remote.h>
 
 #include <netinet/in.h>
 #include <sys/socket.h>

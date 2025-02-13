@@ -1,5 +1,6 @@
 #include <-Y11/S/message-handler.h>
 #include <-Y11/S/server.h>
+#include <-Y11/S/client.h>
 #include <stdio.h>
 
 void y11_msg_cb_INIT(struct client_data*const client, uint16_t response_id, y11_msg_INIT_t* msg, unsigned payload_size, char payload[restrict payload_size]){

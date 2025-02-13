@@ -1,5 +1,6 @@
 #include <sys/uio.h>
 #include <-Y11/S/server.h>
+#include <-Y11/S/client.h>
 #include <-Y11/protocol.h>
 #include <stdbool.h>
 #include <string.h>
@@ -7,7 +8,6 @@
 
 
 int y11_s_send_msg(y11_s_send_msg_args_t args){
-  // TODO: swap message fields if needed
   (void)args;
   if(args.message_size % 4)
     return -1; // Size must be a multiple of 4

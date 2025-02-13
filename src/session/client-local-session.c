@@ -1,3 +1,5 @@
+#include <-Y11/S/client-local-session.h>
+#include <-Y11/S/client-local.h>
 #include <-Y11/S/server.h>
 #include <-Y11/S/user.h>
 #include <-Y11/utils.h>
