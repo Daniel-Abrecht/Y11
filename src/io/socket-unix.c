@@ -21,11 +21,11 @@
     .sun_path = __VA_ARGS__ \
   }}.un), sizeof(struct sockaddr_un)
 
-static eventfd_handler_f listen_socket_unix_ondata;
-static struct dynfd_type listen_socket_unix_type;
+static dpa_s_fd_handler_f listen_socket_unix_ondata;
+static struct y11_s_fd_type listen_socket_unix_type;
 
-void init_unix_socket(void){
-  static struct dynfd dfd;
+void y11_s_init_unix_socket(void){
+  static struct y11_s_fd dfd;
   dfd.type = &listen_socket_unix_type;
   dfd.fd = socket(PF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0);
   if(dfd.fd < 0){
@@ -41,13 +41,13 @@ void init_unix_socket(void){
     perror("listen unix");
     exit(1);
   }
-  if(add_fd(&dfd)){
+  if(y11_s_fd_register(&dfd)){
     perror("epoll_ctl unix");
     exit(1);
   }
 }
 
-void listen_socket_unix_ondata(uint32_t events, struct dynfd* dfd){
+static void listen_socket_unix_ondata(uint32_t events, struct y11_s_fd* dfd){
 retry:;
   (void)events;
   const int session_socket = accept4(dfd->fd, NULL, NULL, SOCK_CLOEXEC);
@@ -64,13 +64,13 @@ retry:;
     perror("getsockopt SOL_SOCKET SO_PEERCRED");
     goto error;
   }
-  struct user_data* user = user_get(cred.uid);
+  struct y11_s_user* user = y11_s_user_get(cred.uid);
   if(!user){
     fprintf(stderr, "Failed to allocate user %lu\n", (long)cred.uid);
     goto error;
   }
-  struct session_data* sd = tcopy((struct session_data){
-    .super.type = &session_data_type,
+  struct y11_s_session* sd = tcopy((struct y11_s_session){
+    .super.type = &y11_s_session_type,
     .super.fd = session_socket,
     .user = user,
   });
@@ -79,7 +79,7 @@ retry:;
     goto error_user;
   }
   printf("new connection fd:%d from unix socket \"%s\", uid %lu\n", session_socket, Y11_SOCKET_PATH, sd->user->uid);
-  if(add_fd(&sd->super)){
+  if(y11_s_fd_register(&sd->super)){
     fprintf(stderr, "failed to add new unix socket client\n");
     goto error_session;
   }
@@ -87,11 +87,11 @@ retry:;
 error_session:
   free(sd);
 error_user:
-  user_put(user);
+  y11_s_user_put(user);
 error:
   close(session_socket);
 }
 
-static struct dynfd_type listen_socket_unix_type = {
+static struct y11_s_fd_type listen_socket_unix_type = {
   .ondata = listen_socket_unix_ondata
 };

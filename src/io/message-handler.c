@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static void process_messages_same(struct client_data*const client, const int size, y11_msg_io_buffer_t*restrict const iobuf){
+static void process_messages_same(struct y11_s_client*const client, const int size, y11_msg_io_buffer_t*restrict const iobuf){
   int off = 0;
   while(off < size){
     const uint_least16_t opcode   = (*(uint16_t*)&iobuf->data[off  ]);
@@ -41,7 +41,7 @@ static void process_messages_same(struct client_data*const client, const int siz
 error:;
 }
 
-static void process_messages_swap(struct client_data* client, int size, y11_msg_io_buffer_t*restrict iobuf){
+static void process_messages_swap(struct y11_s_client* client, int size, y11_msg_io_buffer_t*restrict iobuf){
   int off = 0;
   while(off < size){
     const uint_least16_t opcode   = bswap_16(*(uint16_t*)&iobuf->data[off  ]);
@@ -78,8 +78,8 @@ static void process_messages_swap(struct client_data* client, int size, y11_msg_
 error:;
 }
 
-void process_messages(struct client_data*const client, const int size, y11_msg_io_buffer_t*restrict const iobuf){
-  if(client->swap_endianess){
+void y11_s_process_messages(struct y11_s_client*const client, const int size, y11_msg_io_buffer_t*restrict const iobuf){
+  if(dpa_u_unlikely(client->swap_endianess)){
     process_messages_swap(client, size, iobuf);
   }else{
     process_messages_same(client, size, iobuf);

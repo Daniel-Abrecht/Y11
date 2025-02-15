@@ -11,13 +11,13 @@
 #include <stdio.h>
 #include <string.h>
 
-enum endpoint_msg_type_e {
-  ENDPOINT_NEW_CLIENT = 1,
+enum y11_endpoint_msg_type_e {
+  Y11_ENDPOINT_NEW_CLIENT = 1,
 };
 
-static void session_data_handle_message(struct session_data* sd, enum endpoint_msg_type_e op, int fd){
+static void session_data_handle_message(struct y11_s_session* sd, enum y11_endpoint_msg_type_e op, int fd){
   switch(op){
-    case ENDPOINT_NEW_CLIENT: {
+    case Y11_ENDPOINT_NEW_CLIENT: {
       int domain, type;
       if( getsockopt(fd, SOL_SOCKET, SO_DOMAIN, &domain, (socklen_t[]){sizeof(domain)}) == -1
        || getsockopt(fd, SOL_SOCKET, SO_TYPE, &type, (socklen_t[]){sizeof(type)}) == -1
@@ -34,7 +34,7 @@ static void session_data_handle_message(struct session_data* sd, enum endpoint_m
         perror("getsockopt SOL_SOCKET SO_PEERCRED");
         break;
       }
-      struct user_data* user = user_get(cred.uid);
+      struct y11_s_user* user = y11_s_user_get(cred.uid);
       if(!user){
         fprintf(stderr, "Failed to allocate user %lu\n", (long)cred.uid);
         break;
@@ -44,10 +44,10 @@ static void session_data_handle_message(struct session_data* sd, enum endpoint_m
         perror("dup");
         goto enc_err_user;
       }
-      struct local_client_data* lc = tcopy((struct local_client_data){
+      struct y11_s_client_local* lc = tcopy((struct y11_s_client_local){
         .super = {
           .super = {
-            .type = &local_client_init_type,
+            .type = &y11_s_client_local_init_type,
             .fd = fd,
           },
           .user = user,
@@ -58,27 +58,27 @@ static void session_data_handle_message(struct session_data* sd, enum endpoint_m
         perror("calloc");
         goto enc_err_dup;
       }
-      user_ref(lc->session_user);
+      dpa_s_user_ref(lc->session_user);
       printf("new connection fd:%d (user %lu) from unix socket fd:%d (user %lu)\n", fd, user->uid, sd->super.fd, sd->user->uid);
-      if(add_fd(&lc->super.super)){
+      if(y11_s_fd_register(&lc->super.super)){
         fprintf(stderr, "failed to add new unix socket client\n");
         goto enc_err_alloc;
       }
       break;
     enc_err_alloc:
-      user_put(lc->session_user);
+      y11_s_user_put(lc->session_user);
       free(lc);
     enc_err_dup:
       close(fd);
     enc_err_user:
-      user_put(user);
+      y11_s_user_put(user);
     } break;
   }
 }
 
-static void session_ondata(uint32_t events, struct dynfd* dfd){
+static void session_ondata(uint32_t events, struct y11_s_fd* dfd){
   (void)events;
-  struct session_data* sd = dpa_u_container_of(dfd, struct session_data, super);
+  struct y11_s_session* sd = dpa_u_container_of(dfd, struct y11_s_session, super);
 
   union {
     char   buf[CMSG_SPACE(sizeof(int))];
@@ -99,7 +99,7 @@ static void session_ondata(uint32_t events, struct dynfd* dfd){
   ssize_t nr = recvmsg(sd->super.fd, &msgh, MSG_CMSG_CLOEXEC);
   struct cmsghdr* cmsgp = CMSG_FIRSTHDR(&msgh);
   if(!nr){
-    dynfd_destroy(&sd->super, false);
+    y11_s_fd_destroy(&sd->super, false);
     return;
   }
   int fd = -1;
@@ -117,13 +117,13 @@ end:
   close(fd); // Note: If we actually need the fd later, we dup it in session_data_handle_message
 }
 
-static void unix_socket_session_destroy(struct dynfd* dfd){
-  struct session_data* sd = dpa_u_container_of(dfd, struct session_data, super);
-  user_put(sd->user);
+static void unix_socket_session_destroy(struct y11_s_fd* dfd){
+  struct y11_s_session* sd = dpa_u_container_of(dfd, struct y11_s_session, super);
+  y11_s_user_put(sd->user);
   free(sd);
 }
 
-const struct dynfd_type session_data_type = {
+const struct y11_s_fd_type y11_s_session_type = {
   .ondata = session_ondata,
   .destroy = unix_socket_session_destroy,
 };

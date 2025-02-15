@@ -3,9 +3,11 @@
 
 #include <-Y11/S/dynfd.h>
 
-struct session_data {
-  struct dynfd super;
-  struct user_data* user;
+struct y11_s_session {
+  struct y11_s_fd super;
+  struct y11_s_user* user;
 };
+
+extern const struct y11_s_fd_type y11_s_session_type;
 
 #endif

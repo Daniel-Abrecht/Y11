@@ -3,15 +3,15 @@
 
 #include <dpa/utils/refcount.h>
 
-struct user_data {
+struct y11_s_user {
   dpa_u_refcount_t refcount;
   long uid;
 };
 
-struct user_data* user_get(long uid);
-void user_put(struct user_data* user);
+struct y11_s_user* y11_s_user_get(long uid);
+void y11_s_user_put(struct y11_s_user* user);
 
-static inline void user_ref(struct user_data* user){
+static inline void dpa_s_user_ref(struct y11_s_user* user){
   dpa_u_refcount_ref(user->refcount);
 }
 

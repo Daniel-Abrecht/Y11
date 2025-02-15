@@ -4,12 +4,12 @@
 #include <-Y11/S/dynfd.h>
 #include <stdbool.h>
 
-struct client_data {
-  struct dynfd super;
+struct y11_s_client {
+  struct y11_s_fd super;
   bool swap_endianess;
-  struct user_data* user;
+  struct y11_s_user* user;
 };
 
-void client_destroy(struct client_data* client);
+void y11_s_client_destroy(struct y11_s_client* client);
 
 #endif

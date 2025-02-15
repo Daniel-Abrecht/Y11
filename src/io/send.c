@@ -43,13 +43,13 @@ int y11_s_send_msg(y11_s_send_msg_args_t args){
   return y11_s_send(&args.client->super, size, 4, parts);
 }
 
-int y11_s_send(struct dynfd* dfd, size_t size, int count, struct iovec* io){
+int y11_s_send(struct y11_s_fd* dfd, size_t size, int count, struct iovec* io){
   if(!size)
     return 0;
   if(size > DQ_PAGE_LIMIT)
     return -1;
-  data_queue_t*restrict queue = &dfd->send_queue;
-  data_queue_entry_t*restrict qe = *queue->last;
+  struct y11_s_data_queue*restrict queue = &dfd->send_queue;
+  struct y11_s_data_queue_entry*restrict qe = *queue->last;
   const bool send_already_pending = qe;
   if(qe && qe->used+size <= DQ_PAGE_LIMIT){
     short new_used = qe->used + size;
@@ -57,7 +57,7 @@ int y11_s_send(struct dynfd* dfd, size_t size, int count, struct iovec* io){
     if(new_used > queue_size){
       while(queue_size < new_used)
         queue_size *= 2;
-      qe = realloc(qe, sizeof(data_queue_entry_t) + queue_size);
+      qe = realloc(qe, sizeof(struct y11_s_data_queue_entry) + queue_size);
       if(!qe)
         return -1;
       *queue->last = qe; // Initially, this points to queue->first. Later, it points to the entry->next field of the previous entry.
@@ -79,7 +79,7 @@ int y11_s_send(struct dynfd* dfd, size_t size, int count, struct iovec* io){
     entry_size++;
     if(entry_size < DQ_INITIAL_CAPACITY)
       entry_size = DQ_INITIAL_CAPACITY;
-    qe = calloc(1, sizeof(data_queue_entry_t) + entry_size);
+    qe = calloc(1, sizeof(struct y11_s_data_queue_entry) + entry_size);
     if(!qe)
       return -1;
     if(*queue->last)

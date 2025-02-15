@@ -5,28 +5,22 @@
 #include <dpa/utils/refcount.h>
 #include <stdbool.h>
 
-struct client_data;
+struct y11_s_client;
 
-extern const struct dynfd_type session_data_type;
-extern const struct dynfd_type remote_client_type;
-extern const struct dynfd_type local_client_type;
-extern const struct dynfd_type local_client_init_type;
+int y11_s_fd_register(struct y11_s_fd* dynfd);
 
-int add_fd(struct dynfd* dynfd);
-void remove_fd(int fd);
+void y11_s_server_init(void);
+void y11_s_init_unix_socket(void);
+void y11_s_init_tcp_socket(void);
+bool y11_s_server_tick(void);
 
-void server_init(void);
-void init_unix_socket(void);
-void init_tcp_socket(void);
-bool server_tick(void);
-
-void dynfd_destroy(struct dynfd* sd, bool error);
+void y11_s_fd_destroy(struct y11_s_fd* sd, bool error);
 
 struct iovec;
-int y11_s_send(struct dynfd* client, size_t size, int count, struct iovec* io);
+int y11_s_send(struct y11_s_fd* client, size_t size, int count, struct iovec* io);
 
 typedef struct y11_s_send_msg_args {
-  struct client_data* client;
+  struct y11_s_client* client;
   // enum y11_msg_opcode type;
   int type;
   unsigned message_size;
@@ -43,7 +37,7 @@ typedef struct y11_s_send_msg_args {
     .client = (CLIENT), \
     .type = Y11_G_MESSAGE_TYPE((MESSAGE)), \
     .message_size = sizeof(*(MESSAGE)), \
-    .message = (CLIENT)->swap_endianess ? Y11_G_MESSAGE_SWAP(MESSAGE) : (MESSAGE), \
+    .message = dpa_u_unlikely((CLIENT)->swap_endianess) ? Y11_G_MESSAGE_SWAP(MESSAGE) : (MESSAGE), \
     __VA_ARGS__ \
   })
 

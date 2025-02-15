@@ -2,7 +2,7 @@
 #include <-Y11/S/client.h>
 #include <-Y11/S/user.h>
 
-void client_destroy(struct client_data* client){
-  user_put(client->user);
+void y11_s_client_destroy(struct y11_s_client* client){
+  y11_s_user_put(client->user);
   free(client);
 }
