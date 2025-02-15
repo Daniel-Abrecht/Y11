@@ -1,7 +1,7 @@
 #ifndef Y11__S_SERVER_H
 #define Y11__S_SERVER_H
 
-#include <-Y11/S/dynfd.h>
+#include <-Y11/S/fd.h>
 #include <dpa/utils/refcount.h>
 #include <stdbool.h>
 

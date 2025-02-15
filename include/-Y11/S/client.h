@@ -1,7 +1,7 @@
 #ifndef Y11__S_CLIENT_H
 #define Y11__S_CLIENT_H
 
-#include <-Y11/S/dynfd.h>
+#include <-Y11/S/fd.h>
 #include <stdbool.h>
 
 struct y11_s_client {

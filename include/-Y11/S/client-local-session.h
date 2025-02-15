@@ -1,7 +1,7 @@
 #ifndef Y11__S_CLIENT_SESSION_DATA_H
 #define Y11__S_CLIENT_SESSION_DATA_H
 
-#include <-Y11/S/dynfd.h>
+#include <-Y11/S/fd.h>
 
 struct y11_s_session {
   struct y11_s_fd super;
