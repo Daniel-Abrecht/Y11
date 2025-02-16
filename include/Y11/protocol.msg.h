@@ -8,8 +8,10 @@
   X(P, COMMIT,  0x0001) \
   X(P, DISCARD, 0x0002) \
   \
-  X(P, CLIENT_SEND_MESSAGE,   0x0003) \
-  X(P, UPDATE_STYLESHEET,     0x0004) \
+  X(P, REGISTER_IDENTIFIER,   0x0003) \
+  X(P, PUT_IDENTIFIER,        0x0004) \
+  X(P, CLIENT_SEND_MESSAGE,   0x0005) \
+  X(P, UPDATE_STYLESHEET,     0x0006) \
   \
   /*** The following commands may be queued, use OP_COMMIT or OP_DISCARD to commit / discard their changes ***/ \
   X(P, USE_NODE,              0x0000 | Y11_MSGOP_TRANSACTIONAL) \
@@ -33,6 +35,12 @@ enum y11_msg_opcode {
 #undef OP2ENUM
 };
 
+Y11_MESSAGE_COMPONENT(identifier, 4, (
+  // If the first byte starts with the bits 0XXXXXXX, then this is a string of 8 characters, or a shorter null terminated one, stored inline.
+  // If the first byte starts with the bits 1000XXXX, then the last 4 bits specify the length of the string, stored inline.
+  // If the first byte is 10100000, then the remaining 7 bytes refer to a long identifer previously registred with the server.
+  uint8_t id[8];
+))
 
 Y11_MESSAGE_COMPONENT(header_short, 4, (
   uint16_t opcode;
@@ -57,6 +65,14 @@ Y11_MESSAGE(NOOP, 4, (
 
 Y11_MESSAGE(COMMIT, 4, (
   char reserved[4];
+))
+
+Y11_MESSAGE(REGISTER_IDENTIFIER, 4, (
+  y11_msg_identifier_t id;
+))
+
+Y11_MESSAGE(PUT_IDENTIFIER, 4, (
+  y11_msg_identifier_t id;
 ))
 
 Y11_MESSAGE(DISCARD, 4, (
@@ -97,14 +113,18 @@ Y11_MESSAGE(CREATE_SOCKET, 4, (
 
 Y11_MESSAGE(CREATE_ELEMENT, 4, (
   y11_msg_node_t node;
+  y11_msg_identifier_t tag;
+  uint32_t count;
 ))
 
 Y11_MESSAGE(CREATE_TEXT, 4, (
   y11_msg_node_t node;
+  uint32_t count;
 ))
 
 Y11_MESSAGE(CREATE_CANVAS, 4, (
   y11_msg_node_t node;
+  uint32_t count;
 ))
 
 Y11_MESSAGE(ELEMENT_SET_ATTRIBUTE, 4, (
