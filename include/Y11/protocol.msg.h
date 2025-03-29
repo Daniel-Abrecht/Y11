@@ -69,6 +69,7 @@ Y11_MESSAGE(COMMIT, 4, (
 
 Y11_MESSAGE(REGISTER_IDENTIFIER, 4, (
   y11_msg_identifier_t id;
+  // identifier name in payload
 ))
 
 Y11_MESSAGE(PUT_IDENTIFIER, 4, (
@@ -138,7 +139,7 @@ Y11_MESSAGE(NODE_MOVE_TO, 4, (
 ))
 
 Y11_MESSAGE_COMPONENT(plug_id, 4, (
-  char plug_id[64];
+  y11_msg_identifier_t id;
 ))
 
 Y11_MESSAGE(SOCKET_ATTACHE, 4, (
@@ -152,5 +153,5 @@ Y11_MESSAGE(CLIENT_SEND_MESSAGE, 4, (
 
 Y11_MESSAGE(UPDATE_STYLESHEET, 4, (
   y11_msg_node_t node;
-  // followed by css styles
+  // Payload is the modified CSS styles
 ))

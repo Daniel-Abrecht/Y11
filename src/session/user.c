@@ -5,9 +5,9 @@
 static dpa_u_map_lu_t user_map;
 
 struct y11_s_user* y11_s_user_get(long uid){
-  dpa_u_optional_pointer_t res = dpa_u_map_get(&user_map, uid);
+  dpa_u_optional_t res = dpa_u_map_get(&user_map, uid);
   if(res.present){
-    struct y11_s_user* user = res.value;
+    struct y11_s_user* user = res.value.ptr;
     dpa_u_refcount_ref(&user->refcount);
     return user;
   }
