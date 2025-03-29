@@ -1,6 +1,7 @@
-#include <-Y11/utils.h>
 #include <-Y11/S/server.h>
 #include <-Y11/S/client-remote.h>
+
+#include <dpa/utils/mem.h>
 
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -54,7 +55,7 @@ retry:;
     perror("accept4 tcp");
     exit(1);
   }
-  struct y11_s_client_remote* sd = tcopy((struct y11_s_client_remote){
+  struct y11_s_client_remote* sd = dpa_u_copy((struct y11_s_client_remote){
     .super.super.type = &y11_s_client_remote_type,
     .super.super.fd = client_remote_socket,
   });

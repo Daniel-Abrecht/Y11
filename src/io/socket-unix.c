@@ -1,8 +1,9 @@
-#include <-Y11/utils.h>
 #include <-Y11/S/client-local-session.h>
 #include <-Y11/S/server.h>
 #include <-Y11/S/user.h>
 #include <-Y11/protocol.h>
+
+#include <dpa/utils/mem.h>
 
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -69,7 +70,7 @@ retry:;
     fprintf(stderr, "Failed to allocate user %lu\n", (long)cred.uid);
     goto error;
   }
-  struct y11_s_session* sd = tcopy((struct y11_s_session){
+  struct y11_s_session* sd = dpa_u_copy((struct y11_s_session){
     .super.type = &y11_s_session_type,
     .super.fd = session_socket,
     .user = user,

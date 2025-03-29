@@ -2,8 +2,8 @@
 #include <-Y11/S/client-local.h>
 #include <-Y11/S/server.h>
 #include <-Y11/S/user.h>
-#include <-Y11/utils.h>
 #include <dpa/utils/common.h>
+#include <dpa/utils/mem.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -44,7 +44,7 @@ static void session_data_handle_message(struct y11_s_session* sd, enum y11_endpo
         perror("dup");
         goto enc_err_user;
       }
-      struct y11_s_client_local* lc = tcopy((struct y11_s_client_local){
+      struct y11_s_client_local* lc = dpa_u_copy((struct y11_s_client_local){
         .super = {
           .super = {
             .type = &y11_s_client_local_init_type,
