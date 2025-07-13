@@ -43,9 +43,9 @@
 #define Y11_G_MESSAGE_TYPE(MSG) _Generic((MSG) Y11_PROTOCOL_MESSAGES(0, Y11_G_MESSAGE_TYPE_CASE))
 
 #define Y11_G_MESSAGE_SWAP_CASE(MSG, T, V) \
-  , y11_msg_ ## T ## _t: y11_msg_swap_endianess__##T(&(struct{y11_msg_ ## T ## _t msg;}){DPA__G(y11_msg_ ## T ## _t,(MSG))}.msg) \
-  , y11_msg_ ## T ## _t*: y11_msg_swap_endianess__##T(&(struct{y11_msg_ ## T ## _t msg;}){DPA__G(y11_msg_ ## T ## _t,*(MSG))}.msg) \
-  , const y11_msg_ ## T ## _t*: y11_msg_swap_endianess__##T(&(struct{y11_msg_ ## T ## _t msg;}){DPA__G(y11_msg_ ## T ## _t,*(MSG))}.msg)
+  , y11_msg_ ## T ## _t: y11_msg_swap_endianess__##T(&(struct{y11_msg_ ## T ## _t msg;}){DPA_U_G(y11_msg_ ## T ## _t,(MSG))}.msg) \
+  , y11_msg_ ## T ## _t*: y11_msg_swap_endianess__##T(&(struct{y11_msg_ ## T ## _t msg;}){DPA_U_G(y11_msg_ ## T ## _t,*(MSG))}.msg) \
+  , const y11_msg_ ## T ## _t*: y11_msg_swap_endianess__##T(&(struct{y11_msg_ ## T ## _t msg;}){DPA_U_G(y11_msg_ ## T ## _t,*(MSG))}.msg)
 
 #define Y11_G_MESSAGE_SWAP(MSG) _Generic((MSG) Y11_PROTOCOL_MESSAGES((MSG), Y11_G_MESSAGE_SWAP_CASE))
 
