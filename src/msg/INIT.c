@@ -5,9 +5,8 @@
 #include <-Y11/S/client-remote.h>
 #include <stdio.h>
 
-void y11_msg_cb_INIT(struct y11_s_client*const client, uint16_t response_id, y11_msg_INIT_t* msg, unsigned payload_size, char payload[restrict payload_size]){
+void y11_msg_cb_INIT(struct y11_s_client*const client, uint16_t response_id, y11_msg_INIT_t* msg, dpa_u_bo_t payload){
   (void)msg;
-  (void)payload_size;
   (void)payload;
   if( client->super.type == &y11_s_client_local_type
    // || client->super.type == &y11_s_client_remote_type

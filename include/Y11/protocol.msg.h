@@ -36,9 +36,11 @@ enum y11_msg_opcode {
 };
 
 Y11_MESSAGE_COMPONENT(identifier, 4, (
-  // If the first byte starts with the bits 0XXXXXXX, then this is a string of 8 characters, or a shorter null terminated one, stored inline.
-  // If the first byte starts with the bits 1000XXXX, then the last 4 bits specify the length of the string, stored inline.
-  // If the first byte is 10100000, then the remaining 7 bytes refer to a long identifer previously registred with the server.
+  /**
+   * The first nibble of the first byte can be anything.
+   * If the second nibble is smaller than 8, it is the length of the inlined itentifier.
+   * Otherwise, the identifier needs to be registred using REGISTER_IDENTIFIER.
+   */
   uint8_t id[8];
 ))
 

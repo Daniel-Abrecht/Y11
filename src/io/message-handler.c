@@ -30,7 +30,7 @@ static void process_messages_same(struct y11_s_client*const client, const int si
   case Y11_MSG_OP_ ## X: { \
     y11_msg_ ## X ## _t msg = {0}; \
     memcpy(&msg, &iobuf->data[off], header_size); \
-    y11_msg_cb_ ## X(client, response_id, &msg, payload_size, &iobuf->data[off]); \
+    y11_msg_cb_ ## X(client, response_id, &msg, (dpa_u_bo_t){.size=payload_size, .data=&iobuf->data[off]}); \
   } break;
       Y11_PROTOCOL_MESSAGES(0,C)
 #undef C
@@ -67,7 +67,7 @@ static void process_messages_swap(struct y11_s_client* client, int size, y11_msg
     y11_msg_ ## X ## _t msg = {0}; \
     memcpy(&msg, &iobuf->data[off], header_size); \
     y11_msg_swap_endianess__ ## X(&msg); \
-    y11_msg_cb_ ## X(client, response_id, &msg, payload_size, &iobuf->data[off]); \
+    y11_msg_cb_ ## X(client, response_id, &msg, (dpa_u_bo_t){.size=payload_size, .data=&iobuf->data[off]}); \
   } break;
       Y11_PROTOCOL_MESSAGES(0,C)
 #undef C
