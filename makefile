@@ -5,12 +5,20 @@ COMPONENTS += Y11-server
 COMPONENTS += libY11-ui
 COMPONENTS += libY11-client
 
-all: init
+all: build
 
 $(COMPONENTS):
 	git worktree add $@ $@
 
 init: $(COMPONENTS)
+
+build: $(patsubst %,build//%,$(COMPONENTS))
+build//%:
+	make -C $* all
+
+clean: $(patsubst %,clean//%,$(COMPONENTS))
+clean//%:
+	make -C $* clean
 
 destroy:
 	for component in $(COMPONENTS); \
@@ -25,5 +33,5 @@ force-destroy:
 	  if [ -d "$$component" ]; then git worktree remove --force "$$component"; fi \
 	done
 
-.PHONY: all init
+.PHONY: all init build build//% clean clean//% destroy force-destroy
 
