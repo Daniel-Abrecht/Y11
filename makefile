@@ -2,7 +2,7 @@
 SHELL=/bin/bash
 
 COMPONENTS += Y11-server
-COMPONENTS += Y11-ui
+COMPONENTS += libY11-ui
 COMPONENTS += libY11-client
 
 all: init
