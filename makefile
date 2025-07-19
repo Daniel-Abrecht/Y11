@@ -17,3 +17,6 @@ bin/Y11: $(OBJECTS)
 build/%.c.o: src/%.c $(HEADERS)
 	mkdir -p $(dir $@)
 	$(CC) -c $(CFLAGS) $< -o $@
+
+clean:
+	rm -rf build/ bin/
