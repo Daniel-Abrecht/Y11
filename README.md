@@ -12,3 +12,10 @@ and / or correlate tag versions for the components.
 You may also wonder, why not just one folder for each component? Because they are somewhat independent,
 and will be worked on somewhat independently. The flexibility will be needed. Also, if other projects
 use, for example, libY11-server, they won't be developed in lockstep with it either.
+
+## Dependencies
+
+* dpa-utils:
+    [self-hosted](https://projects.dpa.li/git/dpa-utils.git)
+    [GitHub](https://github.com/Daniel-Abrecht/dpa-utils.git)
+    [GitLab](https://gitlab.com/DanielAbrecht/dpa-utils.git)
