@@ -6,5 +6,4 @@ void y11_msg_cb_NOOP(struct y11_s_client*const client, uint16_t response_id, y11
   (void)response_id;
   (void)msg;
   (void)payload;
-  puts("NOOP");
 }

@@ -44,13 +44,22 @@ Y11_MESSAGE_COMPONENT(identifier, 4, (
   uint8_t id[8];
 ))
 
+/**
+ * The short header should be used if `payload_size` and `response_id` is 0,
+ * meaning there is no payload, and no response.
+ * Every message has either the short or long header.
+ */
 Y11_MESSAGE_COMPONENT(header_short, 4, (
   uint16_t opcode;
   uint16_t size;
 ))
 
+/**
+ * The long header.
+ * Every message has either the short or long header.
+ */
 Y11_MESSAGE_COMPONENT(header_long, 4, (
-  uint16_t opcode;
+  uint16_t opcode; //< Make sure to set the Y11_MSGOP_HAS_PAYLOAD_OR_RESPONSE_ID flag.
   uint16_t size;
   uint16_t payload_size;
   uint16_t response_id;

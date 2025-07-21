@@ -21,12 +21,23 @@ void y11_msg_cb_REGISTER_IDENTIFIER(struct y11_s_client*const client, uint16_t r
   memcpy(&cid, msg->id.id, 8);
   dpa_u_a_bo_unique_t id = dpa_u_bo_intern(payload);
   if(dpa_u_bo_is_error(id)){
-    // TODO
+    // TODO: respond with error
+  }
+  if(dpa_u_set_has(&client->id_set, id)){
+    dpa_u_bo_put(id);
+    fprintf(stderr, "Protocol error: identifier is already registred.\n");
+    y11_s_fd_destroy(&client->super, true);
+    return;
   }
   if(dpa_u_map_set_if_unset(&client->id_name_map, cid, id)){
     dpa_u_bo_put(id);
     fprintf(stderr, "Protocol error: identifier is already registred.\n");
     y11_s_fd_destroy(&client->super, true);
     return;
+  }
+  if(dpa_u_set_add(&client->id_set, id) == -1){
+    dpa_u_bo_put(id);
+    dpa_u_map_remove(&client->id_name_map, cid);
+    // TODO: respond with error
   }
 }

@@ -26,9 +26,14 @@
     Y11__UNPACK Y \
   };
 
+/**
+ * Protocol opcode flags.
+ * @{
+ */
 #define Y11_MSGOP_OPCODE_MASK                 0x0FFFu
 #define Y11_MSGOP_TRANSACTIONAL               0x0800u
 #define Y11_MSGOP_HAS_PAYLOAD_OR_RESPONSE_ID  0x1000u
+/** @} */
 
 #include <Y11/protocol.msg.h>
 
