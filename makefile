@@ -13,7 +13,7 @@ $(COMPONENTS):
 init: $(COMPONENTS)
 
 build: $(patsubst %,build//%,$(COMPONENTS))
-build//%:
+build//%: %
 	make -C $* all
 
 clean: $(patsubst %,clean//%,$(COMPONENTS))
