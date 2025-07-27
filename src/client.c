@@ -48,6 +48,7 @@ y11_client_endpoint_t* y11_client_endpoint_new(const char* target){
     target = "/var/lib/Y11/y11.socket";
   endpoint->fd = -1;
   if(target[0] == '/'){
+    endpoint->type = Y11_CT_UNIX_SOCKET;
     const int fd = open(target, O_PATH|O_CLOEXEC);
     if(fd == -1){
       perror("open");
@@ -69,26 +70,29 @@ y11_client_endpoint_t* y11_client_endpoint_new(const char* target){
     }
     close(fd);
   }else if(!strncmp("fd:",target,3)){
+    endpoint->type = Y11_CT_UNIX_SOCKET;
     endpoint->shared = true;
     endpoint->fd = atoi(target+3);
   }else if(!strncmp("remote:",target,7)){
     endpoint->type = Y11_CT_ADDRESS;
     endpoint->address = strdup(target+7);
   }
-  if(endpoint->fd < 0){
-    fprintf(stderr, "Couldn't parse Y11_SERVER option");
-    goto error;
-  }
-  int domain, type;
-  if( getsockopt(endpoint->fd, SOL_SOCKET, SO_DOMAIN, &domain, (socklen_t[]){sizeof(domain)}) == -1
-   || getsockopt(endpoint->fd, SOL_SOCKET, SO_TYPE, &type, (socklen_t[]){sizeof(type)}) == -1
-  ){
-    perror("getsockopt");
-    goto error;
-  }
-  if(domain != PF_UNIX || type != SOCK_SEQPACKET){
-    perror("socket has wrong type!");
-    goto error;
+  if(endpoint->type == Y11_CT_UNIX_SOCKET){
+    if(endpoint->fd < 0){
+      fprintf(stderr, "Couldn't parse Y11_SERVER option\n");
+      goto error;
+    }
+    int domain, type;
+    if( getsockopt(endpoint->fd, SOL_SOCKET, SO_DOMAIN, &domain, (socklen_t[]){sizeof(domain)}) == -1
+     || getsockopt(endpoint->fd, SOL_SOCKET, SO_TYPE, &type, (socklen_t[]){sizeof(type)}) == -1
+    ){
+      perror("getsockopt");
+      goto error;
+    }
+    if(domain != PF_UNIX || type != SOCK_SEQPACKET){
+      perror("socket has wrong type!");
+      goto error;
+    }
   }
   dpa_u_refcount_increment(&endpoint->refcount);
   return endpoint;
@@ -106,10 +110,10 @@ y11_client_t* y11_client_new(y11_client_endpoint_t* endpoint){
     perror("calloc");
     return 0;
   }
-  int fds[2];
-  if(socketpair(PF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, fds) == -1)
-    goto error;
-  {
+  if(endpoint->type == Y11_CT_UNIX_SOCKET){
+    int fds[2];
+    if(socketpair(PF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, fds) == -1)
+      goto error;
     struct iovec iov = {
       .iov_base = (unsigned char[]){ENDPOINT_NEW_CLIENT}, // Must send at least one byte
       .iov_len = 1,
@@ -133,13 +137,17 @@ y11_client_t* y11_client_new(y11_client_endpoint_t* endpoint){
     memcpy(CMSG_DATA(cmsg), &fds[1], sizeof(int));
     sendmsg(endpoint->fd, &msg, 0);
     close(fds[1]);
-  }
+    client->fd = fds[0];
+  }else if(endpoint->type == Y11_CT_ADDRESS){
+    fprintf(stderr, "Remote connections not yet implemented\n");
+    goto error;
+  }else goto error;
 
   dpa_u_refcount_increment(&endpoint->refcount);
   client->endpoint = endpoint;
-  client->fd = fds[0];
   dpa_u_refcount_increment(client->refcount);
   return client;
+
 error:
   free(client);
   return 0;
